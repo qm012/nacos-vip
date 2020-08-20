@@ -1,0 +1,63 @@
+## .gitignore for tomas
+
+*.versionsBackup
+.sonar/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+*.class
+*.bak
+*.tmp
+*.log
+
+## .gitignore for intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+
+## .gitignore for eclipse
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.swp
+local.properties
+.classpath
+.settings/
+
+## .gitignore for windows
+Thumbs.db
+ehthumbs.db
+
+
+## .gitignore for mac os x
+.DS_Store
+.AppleDouble
+.LSOverride
+/.classpath
+/.launch
+/.project
+/.settings
+/*.launch
+/*.tmproj
+/ivy*
+/eclipse
+
+
+# "temporary" build files
+target/
+out/
+build/
+logs/
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
