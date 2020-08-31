@@ -21,7 +21,7 @@ It adapts to the client and server, providing usage and deployment documents,
 unified API management of address lists with different storage methods, and support for docker. At the same time, 
 we are also welcome to use, suggest and contribute. If it is helpful or helpful in the future, welcome to star。
 
-##Storage support
+## Storage support
 
 -[x] redis (single machine + cluster)
 
@@ -29,13 +29,13 @@ we are also welcome to use, suggest and contribute. If it is helpful or helpful 
 
 -[ ] embedded Derby (single machine + cluster) (under development)
 
-##Function
+## Function
 
 -[x] docker support
 
 -[ ] script start (under development)
 
-##Parameters
+## Parameters
 
   * nacos-vip system parameters
      
