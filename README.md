@@ -1,97 +1,114 @@
-# nacos vip 单机/集群的vip地址服务中心
+# VIP address service center of Nacos single machine / cluster
 
-## 简介
+See the [中文文档](https://github.com/qm0123/nacos-vip/blob/master/README-zh.md) for Chinese readme.
 
-&emsp;&emsp;&emsp;基于Nacos（官方网站:http://nacos.io ）的额外web服务器，针对`服务端`和`客户端`地址寻址，减少改动(服务端和客户端项目)，方便动态扩容和管理。
-适用于自建Nacos的单机或集群管理，[阿里云的MSE微服务引擎托管](https://cn.aliyun.com/product/aliware/mse)则不需要考虑，官方已经处理好。<br/><br/>
-&emsp;&emsp;&emsp;在去年公司需要使用配置中心时，通过调研和选型，最终使用Nacos来作为配置中心和注册中心。在使用的过程中，我们
-也发现了一些问题，在客户端项目中(spring cloud)和其他客户端(SpringBoot，Go，Node.js，Python...等等)我们在配置服务器地址时 `spring.cloud.nacos.config.serverAddr=127.0.0.1:8848,127.0.0.2:8848,127.0.0.3:8848`，
-如果我们有100+个客户端，地址发生变化，是不是需要对100个客户端都进行更改，这样的方式并不灵活。官方文档和博客上也没有讲的很细，基本只有配置`serverAddr`的方式，而服务端集群模式下，下线或上线新的服务端机器，
-我们需要在`cluster.conf`进行地址变更，也会出现类似的场景，所以去看源码和调研，产生了这个项目。<br/><br/>
-&emsp;&emsp;&emsp;适配客户端和服务端，提供使用方式和部署文档、对不同存储方式的地址列表的统一API管理、对Docker的支持等等，同时也欢迎大家使用、建议、并贡献。如果对大家有所帮助或将来有所帮助，欢迎`Star`一下哦
+## Introduction
 
-## 存储支持
-- [x] Redis (单机+集群) 
-- [x] Cache (单机)
-- [ ] 内嵌derby (单机+集群) (开发中)
+&emsp;&emsp;&emsp;Based on Nacos（官方网站:http://nacos.io ）The additional web server is designed for addressing the addresses of server and client, 
+reducing changes (server and client projects) and facilitating dynamic expansion and management。
+It is suitable for single machine or cluster management of self built Nacos，
+[阿里云的MSE微服务引擎托管](https://cn.aliyun.com/product/aliware/mse) It doesn't need to be considered. The government has dealt with it。<br/><br/>
+&emsp;&emsp;&emsp;When the company needed to use the configuration center last year, through research and selection, 
+Nacos was finally used as the configuration center and registration center。In the process of using, 
+we Some problems were also found in the client project (spring cloud) and other clients (springboot, go, Node.js , python... Etc.)
+When we configure the server address `spring.cloud.nacos.config.serverAddr=127.0.0.1:8848,127.0.0.2:8848,127.0.0.3:8848`，
+If we have 100 + clients and the address changes, do we need to change all 100 clients? This is not flexible。
+The official documents and blogs don't explain it in detail. Basically, it's only to configure 'serveraddr'. In the server cluster mode, 
+new server machines are offline or online，We need to be in` cluster.conf `Address changes, there will be similar scenarios,
+ so go to the source code and research, resulting in this project。<br/><br/>
+&emsp;&emsp;&emsp;
+It adapts to the client and server, providing usage and deployment documents, 
+unified API management of address lists with different storage methods, and support for docker. At the same time, 
+we are also welcome to use, suggest and contribute. If it is helpful or helpful in the future, welcome to star。
 
-## 功能
-- [x] Docker支持 
-- [ ] 脚本启动 (开发中)
+##Storage support
 
-## 参数
+-[x] redis (single machine + cluster)
 
-  * nacos-vip系统参数
+-[x] cache (stand alone)
+
+-[ ] embedded Derby (single machine + cluster) (under development)
+
+##Function
+
+-[x] docker support
+
+-[ ] script start (under development)
+
+##Parameters
+
+  * nacos-vip system parameters
      
- | 参数名 | 含义 | 可选值 | 默认值 |
+ | Parameter name | meaning | Optional value | Default value |
  | ------------ | ------------ | ------------ | ------------ |
- | nacos-vip.accessToken(-D)     | 操作api的秘钥(从Header头的`Access-Token`获取) | String    | 空 |
- | nacos-vip.clusterListSize(-D) | 操作api的传递ip列表大小的界限值               | Integer    | 空 |
- | nacos-vip.standalone(-D)      | 是否在单机模式                               | true/false | false |
+ | nacos-vip.accessToken(-D)     | The secret key of the operation API (obtained from the 'access token' of the header header) | String     | NULL |
+ | nacos-vip.clusterListSize(-D) | The bound value of the size of the delivery IP list of the operation API                    | Integer    | NULL |
+ | nacos-vip.standalone(-D)      | Stand alone mode or not                                                                     | true/false | false |
 
-  * nacos-vip数据源参数
+  * nacos-vip Data source parameters
      
- | 参数名 | 含义 | 可选值 | 默认值 |
+ | Parameter name | meaning | Optional value | Default value |
  | ------------ | ------------ | ------------ | ------------ |
- | spring.redis.host(-D)     | redis地址 | String  | 空 |
- | spring.redis.port(-D)     | redis端口 | int     | 空 |
- | spring.redis.database(-D) | redis库   | int     | 空 |
- | spring.redis.password(-D) | redis密码 | String  | 空 |
-
-## 使用
-
-### jar包方式使用
-
-1. 拉取项目到本地编译或下载已经打好的[nacos-vip-1.0.2.jar](https://gitee.com/qm0123/nacos-vip/attach_files/458888/download)包
-2. 启动
-    * 注:无论单机或集群启动，都建议使用配置redis方式。
-    1. 单机 (-Dnacos-vip.standalone=true)
-        1. 配置redis:   redis存储数据
-        2. 不配置redis: Cache存储数据(数据的生命周期到当前进程结束后)
-    2. 集群 (无需配置:默认为false)
-        1. 配置redis:   redis存储数据  
-        2. 不配置redis: 内嵌derby存储数据(开发中)
+ | spring.redis.host(-D)     | redis address  | String  | NULL |
+ | spring.redis.port(-D)     | redis port     | int     | NULL |
+ | spring.redis.database(-D) | redis index    | int     | NULL |
+ | spring.redis.password(-D) | redis password | String  | NULL |
+ 
+ ## Use
+ 
+ ### Using jar package
+ 
+ 1. Pull the project to local compilation or download the package[nacos-vip-1.0.2.jar](https://gitee.com/qm0123/nacos-vip/attach_files/458888/download)
+ 2. start-up
+     * Note: it is recommended to use the redis configuration mode regardless of whether a single machine or a cluster is started.
+     1. stand-alone (-Dnacos-vip.standalone=true)
+         1. configure redis:    redis Storing data
+         2. No configure redis: Cache Storing data(The life cycle of data is up to the end of the current process)
+     2. Cluster (no configuration required: the default is false)
+         1. configure redis:     redis Storing data
+         2.  No configure redis: Embedded Derby storage data (under development)
+         
+     3. When a stand-alone or cluster is started, redis will be used as the storage mode if redis 
+            has been configured(You can also pull the code and modify it in the code `application.properties`)
+        ```
+        java -jar -Dspring.redis.database=1 -Dspring.redis.host=127.0.0.1 -Dspring.redis.port=6379 -Dspring.redis.password=123456 nacos-vip-1.0.2.jar > logs/catalina.out 2>&1 & 
+        ```  
+     4. Redis is not configured for stand-alone startup
+        ```
+        java -jar -Dnacos-vip.standalone=true nacos-vip-1.0.2.jar > logs/catalina.out 2>&1 & 
+        ```
         
-    3. 单机或集群启动时如果已配置redis将会把redis作为存储模式(也可拉取包在代码中修改 `application.properties`)
-       ```
-       java -jar -Dspring.redis.database=1 -Dspring.redis.host=127.0.0.1 -Dspring.redis.port=6379 -Dspring.redis.password=123456 nacos-vip-1.0.2.jar > logs/catalina.out 2>&1 & 
-       ```  
-    4. 单机启动不配置redis
-       ```
-       java -jar -Dnacos-vip.standalone=true nacos-vip-1.0.2.jar > logs/catalina.out 2>&1 & 
-       ```
+### Docker mode
 
-### docker方式使用
-
-1. 参数选项
-    * -v 宿主机路径:/home/nacos-vip/logs
+1. Parameter options
+    * -v Host path:/home/nacos-vip/logs
     * -e JAVA_OPT="-Dnacos-vip.standalone=true"
-    * -p 宿主机端口:8849
-    * --name 容器名称
-    * -d 后台运行
-    * 其余选项请参考docker运行相关命令
+    * -p Host port:8849
+    * --name Container name
+    * -d Background operation
+    * Refer to docker for other options
     
-2. 运行(默认会从DockerHub拉取 无需docker pull)
+2. Run (by default, it will be pulled from dockerhub without docker pull)
    
-    * 关于集群和单机的模式和相关参数传递请参考 jar包方式使用的描述信息
+    * For cluster and stand-alone mode and related parameter transfer, please refer to the description of jar package mode
     
    ```
    docker run -d qm0123/nacos-vip
    ```
+   
+## Configuration and deployment of Nacos server and client
 
-       
-## nacos服务端和客户端配置部署
-
-### 使用代理(nginx)
+### Using agents(nginx)
 
 ```
 server {
-    # 监听端口，对应客户端和服务端发起请求所指定的连接点端口 默认值8080，无需更改
+    # Listening port, which corresponds to the connection point port specified by the client and server to initiate the request. 
+        The default value is 8080, which does not need to be changed
     listen                 8080;
-    # 自定义域名值 对应客户端和服务端配置的域名
+    # The custom domain name value corresponds to the domain name configured by the client and server
     server_name            nacos-vip.aliyun.com;
     location / {
-        # nacos vip 服务的ip:port,此处也可以使用upstream 代理
+        # nacos vip server ip:port,You can also use the upstream proxy here
         proxy_pass         http://127.0.0.1:8849/;
         proxy_set_header   Host             $host:$server_port;
         proxy_set_header   X-Real-IP        $remote_addr;
@@ -101,44 +118,50 @@ server {
 }
 ```
 
-### nacos服务端
+### Nacos server
 
-1. 单机
-    1. 启动
+1. Stand alone
+    1. start-up
         ```
         sh startup.sh -m standalone
         ```
-2. 集群
-    1. 配置
-        1. 当前最新版本提供配置集群列表的方式
-            1. 解压目录nacos/的conf目录下，有配置文件cluster.conf更改 ip:port 列表
-            2. application.properties配置系统参数获取 nacos.member.list=192.168.16.101:8847?raft_port=8807，192.168.16.101?raft_port=8808，192.168.16.101:8849?raft_port=8809
-            3. AddressServer vip模式的寻址方式 (推荐使用)
-        2. 针对第3种方式的配置
-            1. 从环境变量读取
-                1. windows 我得电脑->右键属性->高级系统设置->环境变量->新建环境变量 变量名:address_server_domain 变量值: 自定义域名值(例如:nacos-vip.aliyun.com(对应nginx代理的 server_name))
-                2. linux 同理
-            2. 从Nacos系统参数读取(推荐)
-                * 注:(外置/内置)数据源配置方式请参考Nacos（官方网站:http://nacos.io）
-                ```
-                 # 需要更改 初始化寻址模式
-                 nacos.core.member.lookup.type=address-server
-                 # 需要更改(自己设定的域名即可) 对应nginx代理的 server_name 
-                 address.server.domain=nacos-vip.aliyun.com 
-                 # 无需更改 nacos的获取地址请求的端口默认8080
-                 # address.server.port=8080
-                 # 需要更改 nacos的获取地址请求的链接是 /nacos/serverlist ，但是客户端和服务端的获取列表协议并不兼容，所以我们需要新开一个接口去兼容服务端
-                 address.server.url=/nacos/server/serverlist
-                ```
-         3. 我们正常启动，使用下面的Open api方式就可以操作nacos的服务列表了，服务端就可以正常发现了(建议在nacos-vip服务启动后通过`Open API`操作初始化好服务列表数据)
-    2. 启动
+2. cluster
+    1. start-up
         ```
         sh startup.sh
         ```
+    2. configure
+        1. The latest version provides a way to configure the cluster list
+            1. change cluster.conf
+            2. application.properties nacos.member.list=192.168.16.101:8847?raft_port=8807，192.168.16.101?raft_port=8808，192.168.16.101:8849?raft_port=8809
+            3. AddressServer vip mode (Recommended)
+        2. Configuration for mode 3
+            1. Read from environment variable
+                1. windows Computer > right click Properties > Advanced System Settings > environment variables > 
+                new environment variable name: Address_ server_ Domain variable value: 
+                custom domain name value (for example: Nacos- vip.aliyun.com (corresponding to the server of nginx proxy_ name))
+                2. linux In the same way
+            2. Read from Nacos system parameters (recommended)
+                * Note: (external / built-in) please refer to Nacos（官方网站:http://nacos.io）
+                ```
+                 # Initialization addressing mode needs to be changed
+                 nacos.core.member.lookup.type=address-server
+                 # The server corresponding to nginx proxy needs to be changed (the domain name can be set by yourself)_ name
+                 address.server.domain=nacos-vip.aliyun.com 
+                 # There is no need to change the port of Nacos' get address request. The default port is 8080
+                 # address.server.port=8080
+                 # To change the access address of Nacos, the link of the request is /nacos/serverlist. However, 
+                   the protocol of getting list between the client and the server is not compatible,
+                   so we need to open a new interface to be compatible with the server
+                 address.server.url=/nacos/server/serverlist
+                ```
+         3. If we start normally, we can operate the service list of Nacos by using the following open API method, 
+         and the server can discover it normally (it is recommended to initialize the service list data through the 'open API' operation after the Nacos VIP service is started)
 
-### 客户端
 
-1. 配置(spring cloud)
+### Nacos client
+
+1. to configure(spring cloud)
    ```
    spring:
       cloud:
@@ -146,33 +169,38 @@ server {
           config:
             file-extension: yaml
             prefix: ${spring.application.name}
-            # 连接Nacos Server指定的连接点 我们将域名放入对应的 endpoint 上
+            # Connect to the connection point specified by Nacos server. 
+              We put the domain name on the corresponding endpoint.
             endpoint: nacos-vip.aliyun.com
           discovery:
             endpoint: nacos-vip.aliyun.com
    ```
    
-2. 域名指定地址的方式
-    1. 本地hosts配置
+2. How domain names specify addresses
+    1. Local hosts configuration
         ```
         127.0.0.1 nacos-vip.aliyun.com
         ```
-    2. 局域网内 使用 DNS 解析域名
-    3. 阿里云内网的负载SLB(免费，客户端部署到阿里云服务器时就无需指定域名了，唯一的缺点可能某些时刻在大区下配额不足.)
+    2. Using DNS to resolve domain name in LAN
+    3. Load SLB of alicloud intranet 
+      (free. When clients deploy to alicloud servers, there is no need to specify a domain name. 
+      The only drawback is that the quota may be insufficient in the region at some time.)
     
-3. 类似于其他客户端(SpringBoot，Go，Node.js，Python...等等)接入的方式同理
+3. Similar to other clients(SpringBoot，Go，Node.js，Python...Etc.)The way of access is the same
 
-4. 针对于客户端，无论服务端是单机还是集群，我们都可以使用这种方式，方便以后的扩展，一次配置永久使用(除非域名更改的情况下) 在也不用为注册中心和服务中心扩容需要更新所有的服务而担心了。
+4. For the client, whether the server is a single machine or a cluster, we can use this method to facilitate future expansion.
+   Once configured for permanent use (unless the domain name is changed), 
+   there is no need to worry about the need to update all services for the expansion of the registration center and service center.
 
-## Open API 指南
+## Open API Guide
 
-### 查询nacos-vip服务地址列表-客户端
+### Query Nacos service address list - client
 
-1. 请求示例
+1. Request example
     ```
     curl http://127.0.0.1:8849/nacos/serverlist
     ```
-2. 返回示例
+2. Return to example
     ```
     127.0.0.1
     127.0.0.2
@@ -180,13 +208,13 @@ server {
 
     ```    
    
-### 查询nacos-vip服务地址列表-服务端
+### Query Nacos service address list - server
 
-1. 请求示例
+1. Request example
     ```
     curl http://127.0.0.1:8849/nacos/server/serverlist
     ```
-2. 返回示例
+2. Return to example
     ```
     {
         "code": 200，
@@ -195,13 +223,13 @@ server {
     }
     ```
     
-### 增加nacos-vip地址
+### Add Nacos server address
 
-1. 请求示例
+1. Request example
     ```
     curl http://127.0.0.1:8849/nacos/serverlist -X POST -H "Content-Type:application/json" -H "Access-Token:" -d '{"clusterIps": ["127.0.0.1","127.0.0.2","127.0.0.3"]}' -v
     ```
-2. 返回示例
+2. Return to example
     ```
    {
        "code": 200，
@@ -210,14 +238,14 @@ server {
    }
     ```
 
-### 移除nacos-vip地址
+### Remove Nacos server address
 
-1. 请求示例
+1. Request example
     ```
     curl http://127.0.0.1:8849/nacos/serverlist -X DELETE -H "Content-Type:application/json" -H "Access-Token:" -d '{"clusterIps": ["127.0.0.1"]}' -v
     ```
 
-2. 返回示例
+2. Return to example
     ```
    {
        "code": 200，
@@ -226,13 +254,13 @@ server {
    }
     ```
        
-### 清空nacos-vip地址
+### Clear Nacos server address
 
-1. 请求示例
+1. Request example
     ```
     curl http://127.0.0.1:8849/nacos/serverlist/all -X DELETE -H "Content-Type:application/json" -H "Access-Token:" -v
     ```
-2. 返回示例
+2. Return to example
     ```
    {
        "code": 200，

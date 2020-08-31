@@ -23,7 +23,7 @@ public class NacosController {
      * @return server list string
      */
     @GetMapping("/nacos/serverlist")
-    public String getListByClient() {
+    public String serverListByClient() {
         return StorageFactory.get();
     }
 
@@ -33,7 +33,7 @@ public class NacosController {
      * @return RestResult
      */
     @GetMapping("/nacos/server/serverlist")
-    public RestResult getListByServer() {
+    public RestResult serverListByServer() {
         try {
             return RestResultUtils.success(StorageFactory.get());
         } catch (Exception e) {
