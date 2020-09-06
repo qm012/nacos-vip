@@ -4,7 +4,7 @@ See the [中文文档](https://github.com/qm0123/nacos-vip/blob/master/README-zh
 
 ## Introduction
 
-&emsp;&emsp;&emsp;Based on Nacos（官方网站:http://nacos.io ）The additional web server is designed for addressing the addresses of server and client, 
+&emsp;&emsp;&emsp;Based on Nacos（official site:http://nacos.io ）The additional web server is designed for addressing the addresses of server and client, 
 reducing changes (server and client projects) and facilitating dynamic expansion and management。
 It is suitable for single machine or cluster management of self built Nacos，
 [阿里云的MSE微服务引擎托管](https://cn.aliyun.com/product/aliware/mse) It doesn't need to be considered. The government has dealt with it。<br/><br/>
@@ -27,13 +27,13 @@ we are also welcome to use, suggest and contribute. If it is helpful or helpful 
 
 -[x] cache (stand alone)
 
--[ ] embedded Derby (single machine + cluster) (under development)
+-[] embedded Derby (single machine + cluster) (under development)
 
 ## Function
 
 -[x] docker support
 
--[ ] script start (under development)
+-[] script start (under development)
 
 ## Parameters
 
@@ -142,7 +142,7 @@ server {
                 custom domain name value (for example: Nacos- vip.aliyun.com (corresponding to the server of nginx proxy_ name))
                 2. linux In the same way
             2. Read from Nacos system parameters (recommended)
-                * Note: (external / built-in) please refer to Nacos（官方网站:http://nacos.io）
+                * Note: (external / built-in) please refer to Nacos（official site:http://nacos.io）
                 ```
                  # Initialization addressing mode needs to be changed
                  nacos.core.member.lookup.type=address-server
