@@ -1,5 +1,8 @@
 # Nacos 单机/集群的vip地址服务中心
 
+## Current project archive， New language development address。
+### https://github.com/qm012/nacos-address
+
 ## 简介
 
 &emsp;&emsp;&emsp;基于Nacos（官方网站:http://nacos.io ）的额外web服务器，针对`服务端`和`客户端`地址寻址，减少改动(服务端和客户端项目)，方便动态扩容和管理。
